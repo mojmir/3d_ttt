@@ -1,7 +1,5 @@
 from interface.point import Point
 
-__author__ = 'Mojmo'
-
 
 class Field(object):
     """
@@ -13,7 +11,7 @@ class Field(object):
         solved: there is already winner
 
     Methods:
-        add_point: add point of selected value if possible in matrix
+        add_stone: add point of selected value if possible in matrix
         create matrix: return 3D list filled with zero value points, plain field
         guess_point:
         check_winner:
@@ -41,7 +39,7 @@ class Field(object):
             matrix.append(plain)
         return matrix
 
-    def add_point(self, i, j, k, new_value):
+    def add_stone(self, i, j, k, new_value):
         """
         Add point of selected value if possible in matrix
         """
