@@ -1,4 +1,5 @@
 from interface.point import Point
+import random
 
 
 class Field(object):
@@ -54,35 +55,78 @@ class Field(object):
             raise ValueError("Adding point outside of field boundaries")
         self.last_move = (i, j, k)
 
-    def check_winner(self, n): #n is the number of stones in line required to win
+    def guess_stone(self, value):
+        #TODO store list of empty points and pick random from them
+        while True:
+            x = random.randrange(0, self.dimension_x)
+            y = random.randrange(0, self.dimension_y)
+            z = random.randrange(0, self.dimension_z)
+            empty = self.empty_position(x, y, z)
+            if empty:
+                self.add_stone(x, y, z, value)
+                return True
+
+    def valid_position(self, i, j, k):
         """
-        Check if there is a winner after the last move
+        Check if position is valid.
+
+        Returns:
+            bool: True if position is valid
+        """
+        if i < self.dimension_x and j < self.dimension_y and k < self.dimension_z:
+            if i >= 0 and j >= 0 and k >= 0:
+                return True
+        else:
+            return False
+
+    def empty_position(self, i, j, k):
+        """
+        Check if position is valid and empty.
+
+        Returns:
+            bool: True if position is empty
+        """
+        if self.valid_position(i, j, k):
+            empty = (self.matrix[i][j][k].value == 0)
+            return empty
+        else:
+            raise ValueError("Point outside of field boundaries")
+
+    def check_winner(self, n):
+        """
+        Check if there is a winner after the last move.
+
+        Args:
+           n (int): number of stones in line required to win
+
+        Returns:
+            int: value of winner stone, 0 if now winner was found
         """
         dimensions = (self.dimension_x, self.dimension_y, self.dimension_z)
         x, y, z = self.last_move
-        memory = (self.matrix[x][y][z]).value
-        directions = ( (1,0,0),
-                       (0,1,0),
-                       (0,0,1),
-                       (1,1,0),
-                       (1,-1,0),
-                       (1,0,1),
-                       (1,0,-1),
-                       (0,1,1),
-                       (0,1,-1),
-                       (1,1,1),
-                       (1,1,-1),
-                       (1,-1,1),
-                       (-1,1,1) )
+        memory = (self.matrix[x][y][z]).value  # Extra () brackets
+        directions = ((1, 0, 0),    #Should be stored in settings or new object constants
+                       (0, 1, 0),
+                       (0, 0, 1),
+                       (1, 1, 0),
+                       (1, -1, 0),
+                       (1, 0, 1),
+                       (1, 0, -1),
+                       (0, 1, 1),
+                       (0, 1, -1),
+                       (1, 1, 1),
+                       (1, 1, -1),
+                       (1, -1, 1),
+                       (-1, 1, 1))
         for aDirection in directions:
-            position = list(self.last_move)
+            position = list(self.last_move)  # Self last position can be created as list
             count = 0
             value = memory
-            while ( memory == value ):
-                position = [position[i] + aDirection[i] for i in range(3)]
+            while memory == value:
+                position = [position[i] + aDirection[i] for i in range(3)]  # Klobuk dole toto je super
                 count += 1
                 if count == n:
-                    return memory #return the winner
+                    return memory  # return the winner
                 flag = False
                 for i in range(3):
                     if (position[i] == dimensions[i]) or (position[i] == -1):
@@ -91,10 +135,12 @@ class Field(object):
                     break
                 i, j, k = position
                 value = (self.matrix[i][j][k]).value
+
+            #Da sa to zosit dokopy pod jeden for cyklus
             position = list(self.last_move)
             value = memory
             count -= 1
-            while ( memory == value ):
+            while memory == value:
                 position = [position[i] - aDirection[i] for i in range(3)]
                 count += 1
                 if count == n:
@@ -107,7 +153,8 @@ class Field(object):
                     break
                 i, j, k = position
                 value = (self.matrix[i][j][k]).value
-        return 0 #if no winner was found
+
+        return 0
 
     def __str__(self):
         """
@@ -115,7 +162,7 @@ class Field(object):
         """
         text = ""
         for k in range(self.dimension_x):
-            text += str(k) + '\n'
+            text += "X = " + str(k) + '\n'
             for j in range(self.dimension_y):
                 text += str(self.matrix[k][j]) + '\n'
         return text
