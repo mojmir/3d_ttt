@@ -23,22 +23,31 @@ class Field(object):
         self.dimension_x = dimension_x
         self.dimension_y = dimension_y
         self.dimension_z = dimension_z
-        self.matrix = self.create_matrix(dimension_x, dimension_y, dimension_z)
+        self.dimensions = [dimension_x, dimension_y, dimension_z]
+        self.empties = []
+        self.matrix = self.create_matrix()
         self.last_move = None
 
-    def create_matrix(self, width, length, height):
+    def create_matrix(self):
         """
-        Return 3D list filled with zero value points, plain field
+        Return 3D list filled with zero value points
+
+        Creates structure of list inside list inside list. Fills in list of empty field self empties.
+
+        :return list populated with a 0 value points
         """
         matrix = []
-        for i in range(width):
-            plain = []
-            for j in range(length):
+        for i in range(self.dimensions[0]):
+            plane = []
+            for j in range(self.dimensions[1]):
                 line = []
-                for k in range(height):
+                for k in range(self.dimensions[2]):
                     line.append(Point())
-                plain.append(line)
-            matrix.append(plain)
+                    coordinates = [i, j, k]
+                    self.empties.append(coordinates)
+                plane.append(line)
+            matrix.append(plane)
+
         return matrix
 
     def add_stone(self, i, j, k, new_value):
@@ -49,22 +58,22 @@ class Field(object):
             selected_point = self.matrix[i][j][k]
             if selected_point.value == 0:
                 selected_point.value = new_value
+                self.last_move = (i, j, k)
+                self.empties.remove([i, j, k])
             else:
                 raise ValueError("Filling already taken point")
         else:
             raise ValueError("Adding point outside of field boundaries")
-        self.last_move = (i, j, k)
 
     def guess_stone(self, value):
-        #TODO store list of empty points and pick random from them
-        while True:
-            x = random.randrange(0, self.dimension_x)
-            y = random.randrange(0, self.dimension_y)
-            z = random.randrange(0, self.dimension_z)
-            empty = self.empty_position(x, y, z)
-            if empty:
-                self.add_stone(x, y, z, value)
-                return True
+        if self.empties:
+            empty_field = random.choice(self.empties)
+            x = empty_field[0]
+            y = empty_field[1]
+            z = empty_field[2]
+            self.add_stone(x, y, z, value)
+        else:
+            raise ChildProcessError("No-one won") # TODO fix no-winnner situation
 
     def valid_position(self, i, j, k):
         """
@@ -76,21 +85,11 @@ class Field(object):
         if i < self.dimension_x and j < self.dimension_y and k < self.dimension_z:
             if i >= 0 and j >= 0 and k >= 0:
                 return True
+            else:
+                return False
         else:
             return False
 
-    def empty_position(self, i, j, k):
-        """
-        Check if position is valid and empty.
-
-        Returns:
-            bool: True if position is empty
-        """
-        if self.valid_position(i, j, k):
-            empty = (self.matrix[i][j][k].value == 0)
-            return empty
-        else:
-            raise ValueError("Point outside of field boundaries")
 
     def check_winner(self, n):
         """

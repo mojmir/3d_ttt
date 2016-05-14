@@ -36,9 +36,10 @@ class Game(object):
             valid_input = re.match('^\d*,\d*,\d*$', user_input)
             if valid_input:
                 list_of_dimensions = user_input.split(",")
-                dimension_x = int(list_of_dimensions[0])
-                dimension_z = int(list_of_dimensions[1])
-                dimension_y = int(list_of_dimensions[2])
+                list_of_dimensions = [int(char) for char in list_of_dimensions]
+                dimension_x = list_of_dimensions[0]
+                dimension_z = list_of_dimensions[1]
+                dimension_y = list_of_dimensions[2]
                 prepared_field = Field(dimension_x, dimension_y, dimension_z)
                 return prepared_field
             else:
@@ -49,8 +50,9 @@ class Game(object):
             user_input = input("")
             valid_input = re.match('^\d*,\d*,\d*$', user_input)
             if valid_input:
-                list_of_dimensions = user_input.split(",")
-                return list_of_dimensions
+                coordinates = user_input.split(",")
+                coordinates = [int(char) for char in coordinates]
+                return coordinates
             else:
                 print(setting.wrong_dimension)
 
@@ -63,11 +65,11 @@ class Game(object):
     def user_turn(self):
         print(setting.player_question)
         coordinates = self.prompt_coordinates()
-        x = int(coordinates[0])
-        y = int(coordinates[1])
-        z = int(coordinates[2])#TODO try using SET instead of list
+        x = coordinates[0]
+        y = coordinates[1]
+        z = coordinates[2]  # TODO try using SET instead of list
         if self.field.valid_position(x, y, z):
-            if self.field.empty_position(x, y, z):#TODO add reasonable way to add user value
+            if [x, y, z] in self.field.empties:  # TODO add reasonable way to add user value
                 self.field.add_stone(x, y, z, 1)
             else:
                 print(setting.position_occupied)
@@ -79,7 +81,7 @@ class Game(object):
     def turn(self):
         self.turn_counter += 1
         if self.solver_turn:
-            self.field.guess_stone(2)#todo: replace 2 with player value or something like that
+            self.field.guess_stone(2)  # todo: replace 2 with player value or something like that
             self.solver_turn = False
         else:
             self.user_turn()
