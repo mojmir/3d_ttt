@@ -118,41 +118,24 @@ class Field(object):
                        (1, -1, 1),
                        (-1, 1, 1))
         for aDirection in directions:
-            position = list(self.last_move)  # Self last position can be created as list
             count = 0
-            value = memory
-            while memory == value:
-                position = [position[i] + aDirection[i] for i in range(3)]  # Klobuk dole toto je super
-                count += 1
-                if count == n:
-                    return memory  # return the winner
-                flag = False
-                for i in range(3):
-                    if (position[i] == dimensions[i]) or (position[i] == -1):
-                        flag = True
-                if flag:
-                    break
-                i, j, k = position
-                value = (self.matrix[i][j][k]).value
-
-            #Da sa to zosit dokopy pod jeden for cyklus
-            position = list(self.last_move)
-            value = memory
-            count -= 1
-            while memory == value:
-                position = [position[i] - aDirection[i] for i in range(3)]
-                count += 1
-                if count == n:
-                    return memory #return the winner
-                flag = False
-                for i in range(3):
-                    if (position[i] == dimensions[i]) or (position[i] == -1):
-                        flag = True
-                if flag:
-                    break
-                i, j, k = position
-                value = (self.matrix[i][j][k]).value
-
+            for step in (1,-1):
+                position = list(self.last_move)  # Self last position can be created as list
+                value = memory
+                while memory == value:
+                    position = [position[i] + step * aDirection[i] for i in range(3)]  # Klobuk dole toto je super
+                    count += 1
+                    if count == n:
+                        return memory  # return the winner
+                    flag = False
+                    for i in range(3):
+                        if (position[i] == dimensions[i]) or (position[i] == -1):
+                            flag = True
+                    if flag:
+                        break
+                    i, j, k = position
+                    value = (self.matrix[i][j][k]).value
+                count -= 1
         return 0
 
     def __str__(self):
