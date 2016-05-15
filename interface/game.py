@@ -35,12 +35,9 @@ class Game(object):
             user_input = input(setting.dimension_question)
             valid_input = re.match('^\d*,\d*,\d*$', user_input)
             if valid_input:
-                list_of_dimensions = user_input.split(",")
-                list_of_dimensions = [int(char) for char in list_of_dimensions]
-                dimension_x = list_of_dimensions[0]
-                dimension_z = list_of_dimensions[1]
-                dimension_y = list_of_dimensions[2]
-                prepared_field = Field(dimension_x, dimension_y, dimension_z)
+                dimensions = user_input.split(",")
+                dimensions = [int(char) for char in dimensions]
+                prepared_field = Field(dimensions)
                 return prepared_field
             else:
                 print(setting.wrong_dimension)
@@ -65,12 +62,9 @@ class Game(object):
     def user_turn(self):
         print(setting.player_question)
         coordinates = self.prompt_coordinates()
-        x = coordinates[0]
-        y = coordinates[1]
-        z = coordinates[2]  # TODO try using SET instead of list
-        if self.field.valid_position(x, y, z):
-            if [x, y, z] in self.field.empties:  # TODO add reasonable way to add user value
-                self.field.add_stone(x, y, z, 1)
+        if self.field.valid_position(coordinates):
+            if coordinates in self.field.empties:  # TODO add reasonable way to add user value
+                self.field.add_stone(coordinates, 1)
             else:
                 print(setting.position_occupied)
                 self.user_turn()

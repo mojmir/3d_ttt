@@ -19,11 +19,8 @@ class Field(object):
         display:
     """
 
-    def __init__(self, dimension_x, dimension_y, dimension_z):
-        self.dimension_x = dimension_x
-        self.dimension_y = dimension_y
-        self.dimension_z = dimension_z
-        self.dimensions = [dimension_x, dimension_y, dimension_z]
+    def __init__(self, dimensions):
+        self.dimensions = dimensions
         self.empties = []
         self.matrix = self.create_matrix()
         self.last_move = None
@@ -50,16 +47,17 @@ class Field(object):
 
         return matrix
 
-    def add_stone(self, i, j, k, new_value):
+    def add_stone(self, coordinates, new_value):
         """
         Add point of selected value if possible in matrix
         """
-        if i in range(self.dimension_x) and j in range(self.dimension_y) and k in range(self.dimension_z):
+        if self.valid_position(coordinates):
+            i, j, k = coordinates
             selected_point = self.matrix[i][j][k]
             if selected_point.value == 0:
                 selected_point.value = new_value
-                self.last_move = (i, j, k)
-                self.empties.remove([i, j, k])
+                self.last_move = coordinates
+                self.empties.remove(coordinates)
             else:
                 raise ValueError("Filling already taken point")
         else:
@@ -68,28 +66,24 @@ class Field(object):
     def guess_stone(self, value):
         if self.empties:
             empty_field = random.choice(self.empties)
-            x = empty_field[0]
-            y = empty_field[1]
-            z = empty_field[2]
-            self.add_stone(x, y, z, value)
+            self.add_stone(empty_field, value)
         else:
             raise ChildProcessError("No-one won") # TODO fix no-winnner situation
 
-    def valid_position(self, i, j, k):
+    def valid_position(self, coordinates):
         """
         Check if position is valid.
 
         Returns:
-            bool: True if position is valid
+            bool: True if position is valid6+
         """
-        if i < self.dimension_x and j < self.dimension_y and k < self.dimension_z:
-            if i >= 0 and j >= 0 and k >= 0:
-                return True
-            else:
-                return False
+        inside_boundaries = [
+            coordinate in range(dimension) for coordinate, dimension in zip(coordinates, self.dimensions)
+            ]
+        if all(inside_boundaries):
+            return True
         else:
             return False
-
 
     def check_winner(self, n):
         """
@@ -101,7 +95,6 @@ class Field(object):
         Returns:
             int: value of winner stone, 0 if now winner was found
         """
-        dimensions = (self.dimension_x, self.dimension_y, self.dimension_z)
         x, y, z = self.last_move
         memory = (self.matrix[x][y][z]).value  # Extra () brackets
         directions = ((1, 0, 0),    #Should be stored in settings or new object constants
@@ -117,9 +110,11 @@ class Field(object):
                        (1, 1, -1),
                        (1, -1, 1),
                        (-1, 1, 1))
+
+        orientation = (1, -1)
         for aDirection in directions:
             count = 0
-            for step in (1,-1):
+            for step in orientation:
                 position = list(self.last_move)  # Self last position can be created as list
                 value = memory
                 while memory == value:
@@ -129,7 +124,7 @@ class Field(object):
                         return memory  # return the winner
                     flag = False
                     for i in range(3):
-                        if (position[i] == dimensions[i]) or (position[i] == -1):
+                        if (position[i] == self.dimensions[i]) or (position[i] == -1):
                             flag = True
                     if flag:
                         break
@@ -143,9 +138,9 @@ class Field(object):
         Create simple display text
         """
         text = ""
-        for k in range(self.dimension_x):
+        for k in range(self.dimensions[0]):
             text += "X = " + str(k) + '\n'
-            for j in range(self.dimension_y):
+            for j in range(self.dimensions[1]):
                 text += str(self.matrix[k][j]) + '\n'
         return text
 
