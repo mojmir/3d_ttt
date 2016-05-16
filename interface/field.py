@@ -1,4 +1,5 @@
 from interface.point import Point
+import constants
 import random
 
 
@@ -97,22 +98,9 @@ class Field(object):
         """
         x, y, z = self.last_move
         memory = (self.matrix[x][y][z]).value  # Extra () brackets
-        directions = ((1, 0, 0),    #Should be stored in settings or new object constants
-                       (0, 1, 0),
-                       (0, 0, 1),
-                       (1, 1, 0),
-                       (1, -1, 0),
-                       (1, 0, 1),
-                       (1, 0, -1),
-                       (0, 1, 1),
-                       (0, 1, -1),
-                       (1, 1, 1),
-                       (1, 1, -1),
-                       (1, -1, 1),
-                       (-1, 1, 1))
 
         orientation = (1, -1)
-        for aDirection in directions:
+        for aDirection in constants.directions:
             count = 0
             for step in orientation:
                 position = list(self.last_move)  # Self last position can be created as list
