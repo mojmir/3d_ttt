@@ -36,7 +36,7 @@ class Game(object):
             valid_input = re.match('^\d*,\d*,\d*$', user_input)
             if valid_input:
                 dimensions = user_input.split(",")
-                dimensions = [int(char) for char in dimensions]
+                dimensions = tuple(int(char) for char in dimensions)
                 prepared_field = Field(dimensions)
                 return prepared_field
             else:
@@ -48,7 +48,7 @@ class Game(object):
             valid_input = re.match('^\d*,\d*,\d*$', user_input)
             if valid_input:
                 coordinates = user_input.split(",")
-                coordinates = [int(char) for char in coordinates]
+                coordinates = tuple(int(char) for char in coordinates)
                 return coordinates
             else:
                 print(setting.wrong_dimension)
