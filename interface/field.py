@@ -41,7 +41,7 @@ class Field(object):
                 line = []
                 for k in range(self.dimensions[2]):
                     line.append(Point())
-                    coordinates = [i, j, k]
+                    coordinates = (i, j, k)
                     self.empties.append(coordinates)
                 plane.append(line)
             matrix.append(plane)
