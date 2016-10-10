@@ -1,5 +1,5 @@
 from interface.point import Point
-
+import random
 
 class Field(object):
     """
@@ -40,6 +40,16 @@ class Field(object):
             matrix.append(plain)
         return matrix
 
+    def guess_stone(self, value):
+        while True:
+            x = random.randrange(0, self.dimension_x)
+            y = random.randrange(0, self.dimension_y)
+            z = random.randrange(0, self.dimension_z)
+            empty = self.empty_position(x, y, z)
+            if empty:
+                self.add_stone(x, y, z, value)
+                return True
+
     def add_stone(self, i, j, k, new_value):
         """
         Add point of selected value if possible in matrix
@@ -52,7 +62,18 @@ class Field(object):
                 raise ValueError("Filling already taken point")
         else:
             raise ValueError("Adding point outside of field boundaries")
-        self.last_move = (i, j, k)
+
+    def valid_position(self, i, j, k):
+        valid = i in range(self.dimension_x) and j in range(self.dimension_y) and k in range(self.dimension_z)
+        return valid
+
+    def empty_position(self, i, j, k):
+        if self.valid_position(i, j, k):
+            empty = (self.matrix[i][j][k] == 0)
+            return empty
+        else:
+            raise ValueError("Point outside of field boundaries")
+
 
     def check_winner(self, n): #n is the number of stones in line required to win
         """
