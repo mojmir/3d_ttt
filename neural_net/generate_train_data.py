@@ -131,8 +131,7 @@ def flip(field):
         for j in range(field.dimensions[1]):
             for k in range(field.dimensions[2]):
                 #Python doesn't like assignment modification
-                inverted_field_value = -1*field.matrix[i][j][k].value
-                field.matrix[i][j][k].value = inverted_field_value
+                field.matrix[i][j][k].value *= -1
 
 
 def unfold_board(field):
