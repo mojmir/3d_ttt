@@ -1,5 +1,6 @@
 from interface.point import Point
 import random
+import constants
 
 class Field(object):
     """
@@ -75,35 +76,24 @@ class Field(object):
             raise ValueError("Point outside of field boundaries")
 
 
-    def check_winner(self, n): #n is the number of stones in line required to win
+    def check_winner(self, n):  # n is the number of stones in line required to win
         """
         Check if there is a winner after the last move
         """
         dimensions = (self.dimension_x, self.dimension_y, self.dimension_z)
         x, y, z = self.last_move
         memory = (self.matrix[x][y][z]).value
-        directions = ( (1,0,0),
-                       (0,1,0),
-                       (0,0,1),
-                       (1,1,0),
-                       (1,-1,0),
-                       (1,0,1),
-                       (1,0,-1),
-                       (0,1,1),
-                       (0,1,-1),
-                       (1,1,1),
-                       (1,1,-1),
-                       (1,-1,1),
-                       (-1,1,1) )
-        for aDirection in directions:
+        directions = constants.directions
+
+        for direction in directions:
             position = list(self.last_move)
             count = 0
             value = memory
-            while ( memory == value ):
-                position = [position[i] + aDirection[i] for i in range(3)]
+            while memory == value:
+                position = [position[i] + direction[i] for i in range(3)]
                 count += 1
                 if count == n:
-                    return memory #return the winner
+                    return memory  # return the winner
                 flag = False
                 for i in range(3):
                     if (position[i] == dimensions[i]) or (position[i] == -1):
@@ -115,11 +105,12 @@ class Field(object):
             position = list(self.last_move)
             value = memory
             count -= 1
-            while ( memory == value ):
-                position = [position[i] - aDirection[i] for i in range(3)]
+
+            while memory == value:
+                position = [position[i] - direction[i] for i in range(3)]
                 count += 1
                 if count == n:
-                    return memory #return the winner
+                    return memory  # return the winner
                 flag = False
                 for i in range(3):
                     if (position[i] == dimensions[i]) or (position[i] == -1):
@@ -128,7 +119,7 @@ class Field(object):
                     break
                 i, j, k = position
                 value = (self.matrix[i][j][k]).value
-        return 0 #if no winner was found
+        return 0  # if no winner was found
 
     def __str__(self):
         """
