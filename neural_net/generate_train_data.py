@@ -4,7 +4,8 @@ import random
 import math
 #import pdb
 
-def generate_X_train_data(dim_x, dim_y, dim_z, m, win_row, random_state=None):
+
+def generate_x_train_data(dim_x, dim_y, dim_z, m, win_row, random_state=None):
     """
     Inputs:
 
@@ -20,28 +21,29 @@ def generate_X_train_data(dim_x, dim_y, dim_z, m, win_row, random_state=None):
     Construct valid matrix configurations by playing random games.
     """
 
-    if random_state: #this serves for replicability of results (for debugging)
+    if random_state:  # this serves for repeatability of results (for debugging)
         random.seed(random_state)
 
     dimensions = (dim_x, dim_y, dim_z)
-    fieldsX = []
+    fields = []
 
-    for i in range(0,m):
-        aField = Field(dimensions)
+    for i in range(0, m):
+        field = Field(dimensions)
         max_turns = random.randint(1, dim_x*dim_y*dim_z)
         turn = 1
         winner = 0
-        players = [1,-1]
+        players = [1, -1]
         while (turn <= max_turns) and (winner == 0):
             player = players[turn % 2]
-            aField.guess_stone(player)
-            winner = aField.check_winner(win_row)
+            field.guess_stone(player)
+            winner = field.check_winner(win_row)
             turn += 1
-        fieldsX.append(aField)
+        fields.append(field)
 
-    return fieldsX
+    return fields
 
-def evaluate_rnd(fieldsX, win_row, random_state=None):
+
+def evaluate_rnd(fields, win_row, random_state=None):
     """
     Return a list y of evaluations of all fields in fieldsX.
 
@@ -51,7 +53,7 @@ def evaluate_rnd(fieldsX, win_row, random_state=None):
     the player labeled as +1. If this is not the case, the board is flipped.
     The evaluation is calculated by means of (random) games, according to the formula:
 
-    eval = (won_count/num_games) * exp(-lost_count/sqrt(num_games))
+    evaluate = (won_count/num_games) * exp(-lost_count/sqrt(num_games))
 
     Note that we punish the loses by an exponential factor.
     This is just one of the ways how to evaluate the soundness of the configurations.
@@ -60,12 +62,12 @@ def evaluate_rnd(fieldsX, win_row, random_state=None):
 
     """
 
-    if random_state: #this serves for replicability of results (for debugging)
+    if random_state:  # this serves for repeatability of results (for debugging)
         random.seed(random_state)
 
     y = []
 
-    for aField in fieldsX:
+    for field in fields:
 
         # pdb.set_trace()
 
@@ -80,66 +82,68 @@ def evaluate_rnd(fieldsX, win_row, random_state=None):
         0       +1         -
          """
 
-        i, j, k = aField.last_move
-        if aField.matrix[i][j][k].value == -1:
-            flip(aField)
+        i, j, k = field.last_move
+        if field.matrix[i][j][k].value == -1:
+            flip(field)
 
-        winner = aField.check_winner(win_row)
+        winner = field.check_winner(win_row)
         if winner == 1:
-            eval = 1.0
-            y.append(eval)
+            evaluate = 1.0
+            y.append(evaluate)
             continue
 
         won_count = 0
         lost_count = 0
         num_games = 100
-        for game in range(0,num_games):
-
-            memField = copy.deepcopy(aField) #deep copying is necessary here
+        for game in range(0, num_games):
+            mem_field = copy.deepcopy(field)  # deep copying is necessary here
 
             players = [-1, 1]
             turn = 0
 
             while winner == 0:
                 player = players[turn % 2]
-                if memField.empties:
-                    empty_field = random.choice(memField.empties)
-                    memField.add_stone(empty_field, player)
+                if mem_field.empties:
+                    empty_field = random.choice(mem_field.empties)
+                    mem_field.add_stone(empty_field, player)
                 else:
                     break
-                winner = memField.check_winner(win_row)
+                winner = mem_field.check_winner(win_row)
                 turn += 1
 
             if winner == 1:
-                won_count = won_count + 1
+                won_count += won_count
             if winner == -1:
-                lost_count = lost_count + 1
+                lost_count += lost_count
             winner = 0
 
-        eval = won_count * math.exp(-lost_count/math.sqrt(num_games)) / num_games
-        y.append(eval)
+        evaluate = won_count * math.exp(-lost_count/math.sqrt(num_games)) / num_games
+        y.append(evaluate)
 
     return y
 
-def flip(aField):
+
+def flip(field):
     """
     Flips the board by multiplying all the values by -1.
     """
-    for i in range(aField.dimensions[0]):
-        for j in range(aField.dimensions[1]):
-            for k in range(aField.dimensions[2]):
-                aField.matrix[i][j][k].value = - 1 * aField.matrix[i][j][k].value
-    #return aField
+    for i in range(field.dimensions[0]):
+        for j in range(field.dimensions[1]):
+            for k in range(field.dimensions[2]):
+                #Python doesn't like assignment modification
+                inverted_field_value = -1*field.matrix[i][j][k].value
+                field.matrix[i][j][k].value = inverted_field_value
 
-def unfold_board(aField):
+
+def unfold_board(field):
     """
     Return the board configuration as a list x
     """
     x = []
-    for i in range(aField.dimensions[0]):
-        for j in range(aField.dimensions[1]):
-            for k in range(aField.dimensions[2]):
-                x.append((aField.matrix[i][j][k]).value)
+    for i in range(field.dimensions[0]):
+        for j in range(field.dimensions[1]):
+            for k in range(field.dimensions[2]):
+                x.append((field.matrix[i][j][k]).value)
     return x
 
 
